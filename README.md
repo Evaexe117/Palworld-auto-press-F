@@ -1,32 +1,33 @@
-Palworld Auto-F Key Presser
-Description
-Palworld Auto-F Key Presser is a specialized tool designed for the Palworld game. It automates the pressing of the 'F' key, allowing players to focus on strategic aspects of the game. The tool works in the background and does not interfere with other PC operations.
+# Palworld Auto-F Key Presser
 
-Features
-Automatic Key Press: Continuously presses the 'F' key in Palworld without user intervention.
-Non-Disruptive: Runs in the background, allowing normal PC usage.
-Toggle Control: Easily start or stop the auto-press with Shift+P.
-User-Friendly Interface: Simple status window indicating the current operational mode.
-Getting Started
-Prerequisites
-Windows operating system.
-Palworld game installed.
-.NET Framework (specify version).
-Installation
-Download the latest release from the GitHub repository.
-Unzip the downloaded file.
-Run the executable file.
-Usage
-Open the Palworld game.
-Run the Palworld Auto-F Key Presser.
-Press Shift+P to start automatic key pressing.
-Press Shift+P again to stop.
-Contributing
-Contributions to the Palworld Auto-F Key Presser are welcome. Please read CONTRIBUTING.md for details on our code of conduct, and the process for submitting pull requests.
+## Description
+A handy tool for Palworld gamers, the Palworld Auto-F Key Presser automates 'F' key presses in-game. It operates in the background, enabling smooth and uninterrupted gameplay and PC use.
 
-License
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+## Features
+- **Automatic Key Press**: Continuously presses 'F' in Palworld without user intervention.
+- **Non-Disruptive**: Functions seamlessly in the background.
+- **Toggle Control**: Start or stop the auto-press with a simple Shift+P.
+- **User-Friendly Interface**: Comes with a status indicator for operational modes.
 
-Acknowledgments
-Thanks to the Palworld community for their continuous support and feedback.
-Special thanks to [Contributor Names] for their contributions.
+## Getting Started
+
+### Prerequisites
+- Windows OS
+- Palworld game
+- .NET Framework
+
+### Installation
+1. Download from the GitHub repository.
+2. Unzip and run the executable.
+
+### Usage
+1. Open Palworld.
+2. Launch the Auto-F Key Presser.
+3. Use Shift+P to toggle the auto-press function.
+
+## License
+This project is open-sourced under the MIT License. See `LICENSE` for more information.
+
+## Acknowledgments
+- My friendly CHATGPT
+  
