@@ -16,7 +16,7 @@ class Program
     private static IntPtr _hookID = IntPtr.Zero;
     private static bool toggle = false;
     private static Thread sendFThread;
-    private static IntPtr notepadHandle = IntPtr.Zero;
+    private static IntPtr gameHandle = IntPtr.Zero;
     public static StatusForm statusForm;
     public static bool isApplicationRunning = true;
 
@@ -42,7 +42,7 @@ class Program
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Cette application a besoin de privilèges d'administrateur. " + ex.Message);
+                MessageBox.Show("This application requires administrator privileges. " + ex.Message);
                 return;
             }
         }
@@ -55,8 +55,6 @@ class Program
             sendFThread.Start();
             Application.Run(statusForm);
             UnhookWindowsHookEx(_hookID);
-           
-
         }
     }
 
@@ -76,13 +74,13 @@ class Program
         if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
         {
             int vkCode = Marshal.ReadInt32(lParam);
-            Debug.WriteLine("Touche pressée: " + (Keys)vkCode); // Débogage
+            Debug.WriteLine("Key pressed: " + (Keys)vkCode); // Debugging
 
             if ((Keys)vkCode == Keys.P && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
             {
                 toggle = !toggle;
-                Debug.WriteLine("Shift+P pressé - Toggle est maintenant " + toggle); // Débogage
-                //Affichage du statu dans la fentre
+                Debug.WriteLine("Shift+P pressed - Toggle is now " + toggle); // Debugging
+                // Update status in the window
                 statusForm?.Invoke(new Action(() =>
                 {
                     statusForm.UpdateStatus(toggle);
@@ -93,58 +91,52 @@ class Program
                     Process[] processes = Process.GetProcessesByName("Palworld-Win64-Shipping");
                     if (processes.Length > 0)
                     {
-                        notepadHandle = processes[0].MainWindowHandle;
-                        Debug.WriteLine("Handle de Palworld trouvé: " + notepadHandle); // Débogage
+                        gameHandle = processes[0].MainWindowHandle;
+                        Debug.WriteLine("Palworld handle found: " + gameHandle); // Debugging
                     }
                     else
                     {
-                        Debug.WriteLine("PALWORLD n'est pas trouvé."); // Débogage
+                        Debug.WriteLine("PALWORLD not found."); // Debugging
                     }
                 }
 
-                return (IntPtr)1; // Empêcher le traitement ultérieur de la touche
+                return (IntPtr)1; // Prevent further processing of the key
             }
         }
 
         return CallNextHookEx(_hookID, nCode, wParam, lParam);
     }
 
-    [DllImport("user32.dll", SetLastError = true)]
-    static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
-
-    private static bool isKeyDownSent = false;
-
     private static void SendFLoop()
     {
         while (isApplicationRunning)
         {
-            if (toggle && notepadHandle != IntPtr.Zero)
+            if (toggle && gameHandle != IntPtr.Zero)
             {
-                // Simuler un appui continu sur la touche 'F'
-                PostMessage(notepadHandle, WM_KEYDOWN, VK_F, 0);
+                // Simulate a continuous press of the 'F' key
+                PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
             }
-            // Pas besoin de faire quoi que ce soit dans le "else", car aucune touche ne sera envoyée
-            Thread.Sleep(100); // Délai pour éviter une exécution trop rapide
+            // No action needed in the "else" case, as no key press will be sent
+            Thread.Sleep(100); // Delay to prevent too rapid execution
         }
     }
 
+    // DLLImports and function signatures follow, enabling the low-level keyboard hook, message posting, and other Windows API interactions
 
-
-
-
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
 
     [DllImport("user32.dll", SetLastError = true)]
     static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
 
     [DllImport("user32.dll", SetLastError = true)]
-    static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr ProcessId);
+    static extern uint GetWindowThreadProcessId(IntPtr hWnd, out IntPtr ProcessId);
 
     [DllImport("kernel32.dll")]
     static extern uint GetCurrentThreadId();
 
     [DllImport("user32.dll")]
     static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
-
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
