@@ -23,7 +23,7 @@ A handy tool for Palworld gamers, the Palworld Auto-F Key Presser automates 'F' 
 ### Usage
 1. Open Palworld.
 2. Launch the Auto-F Key Presser.
-3. Use Shift+P to toggle the auto-press function.
+3. Use CTRL+P to toggle the auto-press function.
 
 ## License
 This project is open-sourced under the MIT License. See `LICENSE` for more information.
