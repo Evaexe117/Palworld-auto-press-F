@@ -9,12 +9,20 @@ namespace PalWorldPressF
         private Label statusLabel;
         private Button closeButton;
         private Label instructionsLabel; // New label for instructions
+        private TextBox debugTextBox;
 
         private void InitializeComponent()
         {
             statusLabel = new Label();
             closeButton = new Button();
             instructionsLabel = new Label();
+            debugTextBox = new TextBox();
+            debugTextBox.Location = new Point(14, 70); 
+            debugTextBox.Size = new Size(358, 20);
+            debugTextBox.Multiline = false; 
+            debugTextBox.ScrollBars = ScrollBars.Vertical; 
+
+            Controls.Add(debugTextBox);
             SuspendLayout();
             // 
             // statusLabel
@@ -41,13 +49,13 @@ namespace PalWorldPressF
             instructionsLabel.Location = new Point(14, 46);
             instructionsLabel.Name = "instructionsLabel";
             instructionsLabel.Size = new Size(180, 15);
-            instructionsLabel.Text = "Press SHIFT+P to toggle";
+            instructionsLabel.Text = "Press CTRL+P to toggle";
             // 
             // StatusForm
             // 
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(386, 82);
+            ClientSize = new Size(386, 110);
             Controls.Add(statusLabel);
             Controls.Add(instructionsLabel);
             Controls.Add(closeButton);
@@ -56,7 +64,7 @@ namespace PalWorldPressF
             MinimizeBox = false;
             Name = "StatusForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "PalWorld - Press F - By Eva";
+            Text = "PalWorld - Auto Press F in background ";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -79,13 +87,26 @@ namespace PalWorldPressF
             {
                 // Update for "Running" state
                 statusLabel.Text = "Running";
-                statusLabel.ForeColor = Color.Green; // Choose your color
+                statusLabel.ForeColor = Color.Green; 
             }
             else
             {
                 // Update for "Paused" state
                 statusLabel.Text = "Paused";
-                statusLabel.ForeColor = Color.Orange; // Choose your color
+                statusLabel.ForeColor = Color.Orange; 
+            }
+        }
+
+        public void AppendDebugMessage(string message)
+        {
+            
+            if (debugTextBox.InvokeRequired)
+            {
+                debugTextBox.Invoke(new Action<string>(AppendDebugMessage), new object[] { message });
+            }
+            else
+            {
+                debugTextBox.AppendText(message + Environment.NewLine);
             }
         }
     }

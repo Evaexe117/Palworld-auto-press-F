@@ -76,10 +76,10 @@ class Program
             int vkCode = Marshal.ReadInt32(lParam);
             Debug.WriteLine("Key pressed: " + (Keys)vkCode); // Debugging
 
-            if ((Keys)vkCode == Keys.P && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+            if ((Keys)vkCode == Keys.P && (Control.ModifierKeys & Keys.Control) == Keys.Control)
             {
                 toggle = !toggle;
-                Debug.WriteLine("Shift+P pressed - Toggle is now " + toggle); // Debugging
+                Debug.WriteLine("CTRL+P pressed - Toggle is now " + toggle); // Debugging
                 // Update status in the window
                 statusForm?.Invoke(new Action(() =>
                 {
@@ -92,11 +92,12 @@ class Program
                     if (processes.Length > 0)
                     {
                         gameHandle = processes[0].MainWindowHandle;
-                        Debug.WriteLine("Palworld handle found: " + gameHandle); // Debugging
+                        statusForm.Invoke(new Action(() => statusForm.AppendDebugMessage("Palworld handle found: " + gameHandle)));
+
                     }
                     else
                     {
-                        Debug.WriteLine("PALWORLD not found."); // Debugging
+                        statusForm.Invoke(new Action(() => statusForm.AppendDebugMessage("PALWORLD not found.")));
                     }
                 }
 

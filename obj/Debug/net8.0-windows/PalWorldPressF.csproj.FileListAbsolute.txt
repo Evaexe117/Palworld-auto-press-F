@@ -1,0 +1,17 @@
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\PalWorldPressF.StatusForm.resources
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\PalWorldPressF.csproj.GenerateResource.cache
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\PalWorldPressF.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\PalWorldPressF.AssemblyInfoInputs.cache
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\PalWorldPressF.AssemblyInfo.cs
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\PalWorldPressF.csproj.CoreCompileInputs.cache
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\PalWorldPressF.sourcelink.json
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\bin\Debug\net8.0-windows\PalWorldPressF.exe
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\bin\Debug\net8.0-windows\PalWorldPressF.deps.json
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\bin\Debug\net8.0-windows\PalWorldPressF.runtimeconfig.json
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\bin\Debug\net8.0-windows\PalWorldPressF.dll
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\bin\Debug\net8.0-windows\PalWorldPressF.pdb
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\PalWorldPressF.dll
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\refint\PalWorldPressF.dll
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\PalWorldPressF.pdb
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\PalWorldPressF.genruntimeconfig.cache
+C:\Users\Eva01\Source\Repos\Palworld-auto-press-F\obj\Debug\net8.0-windows\ref\PalWorldPressF.dll
