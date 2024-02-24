@@ -1,8 +1,8 @@
 # Palworld Auto-F Key Presser
 
 ## Description
-A handy tool for Palworld gamers, the Palworld Auto-F Key Presser automates 'F' key presses in-game. It operates in the background, enabling smooth and uninterrupted gameplay and PC use.
-
+A handy tool for Palworld gamers, the Palworld Auto-F Key Presser automates 'F' key presses in-game. It operates in the background, enabling smooth and uninterrupted gameplay and PC use.  
+## ONLY TESTED ON STEAN VERSION
 ## Features
 - **Automatic Key Press**: Continuously presses 'F' in Palworld without user intervention.
 - **Non-Disruptive**: Functions seamlessly in the background.
