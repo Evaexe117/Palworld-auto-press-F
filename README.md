@@ -4,9 +4,9 @@
 A handy tool for Palworld gamers, the Palworld Auto-F Key Presser automates 'F' key presses in-game. It operates in the background, enabling smooth and uninterrupted gameplay and PC use.  
 ## ONLY TESTED ON STEAM VERSION
 ## Features
-- **Automatic Key Press**: Continuously presses 'F' in Palworld without user intervention.
+- **Automatic Key Press**: Repeatedly presses 'F' (about 10 times per second) in Palworld without user intervention. Note: it simulates quick individual presses, not a held key.
 - **Non-Disruptive**: Functions seamlessly in the background.
-- **Toggle Control**: Start or stop the auto-press with a simple Shift+P.
+- **Toggle Control**: Start or stop the auto-press with a simple CTRL+P.
 - **User-Friendly Interface**: Comes with a status indicator for operational modes.
 
 ## Getting Started
@@ -26,7 +26,7 @@ A handy tool for Palworld gamers, the Palworld Auto-F Key Presser automates 'F' 
 3. Use CTRL+P to toggle the auto-press function.
 
 ## License
-This project is open-sourced under the MIT License. See `LICENSE` for more information.
+This project is open-sourced under the MIT License.
 
 ## Acknowledgments
 - My friendly CHATGPT
