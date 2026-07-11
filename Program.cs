@@ -12,9 +12,13 @@ class Program
     private const int WM_KEYDOWN = 0x0100;
     private const int WM_KEYUP = 0x0101;
     private const byte VK_F = 0x46; // Virtual key code for 'F'
+    private const int LPARAM_AUTOREPEAT = 0x40000000; // bit 30: previous key state was down
+    private const int LPARAM_KEYUP = unchecked((int)0xC0000001); // repeat count 1 + bits 30/31 set
     private static LowLevelKeyboardProc _proc = HookCallback;
     private static IntPtr _hookID = IntPtr.Zero;
     private static bool toggle = false;
+    private static bool holdToggle = false;
+    public static volatile int spamIntervalMs = 100;
     private static Thread sendFThread;
     private static IntPtr gameHandle = IntPtr.Zero;
     public static StatusForm statusForm;
@@ -54,6 +58,7 @@ class Program
             sendFThread.IsBackground = true;
             sendFThread.Start();
             Application.Run(statusForm);
+            ReleaseHoldIfActive();
             UnhookWindowsHookEx(_hookID);
         }
     }
@@ -79,28 +84,37 @@ class Program
             if ((Keys)vkCode == Keys.P && (Control.ModifierKeys & Keys.Control) == Keys.Control)
             {
                 toggle = !toggle;
-                Debug.WriteLine("CTRL+P pressed - Toggle is now " + toggle); // Debugging
-                // Update status in the window
-                statusForm?.Invoke(new Action(() =>
-                {
-                    statusForm.UpdateStatus(toggle);
-                }));
+                Debug.WriteLine("CTRL+P pressed - Spam toggle is now " + toggle); // Debugging
 
                 if (toggle)
                 {
-                    Process[] processes = Process.GetProcessesByName("Palworld-Win64-Shipping");
-                    if (processes.Length > 0)
-                    {
-                        gameHandle = processes[0].MainWindowHandle;
-                        statusForm.Invoke(new Action(() => statusForm.AppendDebugMessage("Palworld handle found: " + gameHandle)));
-
-                    }
-                    else
-                    {
-                        statusForm.Invoke(new Action(() => statusForm.AppendDebugMessage("PALWORLD not found.")));
-                    }
+                    ReleaseHoldIfActive(); // spam and hold modes are exclusive
+                    FindGameHandle();
                 }
 
+                UpdateStatusDisplay();
+                return (IntPtr)1; // Prevent further processing of the key
+            }
+
+            if ((Keys)vkCode == Keys.H && (Control.ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                if (holdToggle)
+                {
+                    ReleaseHoldIfActive();
+                }
+                else
+                {
+                    toggle = false; // spam and hold modes are exclusive
+                    FindGameHandle();
+                    if (gameHandle != IntPtr.Zero)
+                    {
+                        holdToggle = true;
+                        PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
+                    }
+                }
+                Debug.WriteLine("CTRL+H pressed - Hold toggle is now " + holdToggle); // Debugging
+
+                UpdateStatusDisplay();
                 return (IntPtr)1; // Prevent further processing of the key
             }
         }
@@ -108,17 +122,59 @@ class Program
         return CallNextHookEx(_hookID, nCode, wParam, lParam);
     }
 
+    private static void FindGameHandle()
+    {
+        Process[] processes = Process.GetProcessesByName("Palworld-Win64-Shipping");
+        if (processes.Length > 0)
+        {
+            gameHandle = processes[0].MainWindowHandle;
+            statusForm?.Invoke(new Action(() => statusForm.AppendDebugMessage("Palworld handle found: " + gameHandle)));
+        }
+        else
+        {
+            gameHandle = IntPtr.Zero;
+            statusForm?.Invoke(new Action(() => statusForm.AppendDebugMessage("PALWORLD not found.")));
+        }
+    }
+
+    public static void ReleaseHoldIfActive()
+    {
+        if (holdToggle)
+        {
+            holdToggle = false;
+            if (gameHandle != IntPtr.Zero)
+            {
+                PostMessage(gameHandle, WM_KEYUP, VK_F, LPARAM_KEYUP);
+            }
+        }
+    }
+
+    private static void UpdateStatusDisplay()
+    {
+        statusForm?.Invoke(new Action(() =>
+        {
+            statusForm.UpdateStatus(toggle, holdToggle);
+        }));
+    }
+
     private static void SendFLoop()
     {
         while (isApplicationRunning)
         {
-            if (toggle && gameHandle != IntPtr.Zero)
+            if (gameHandle != IntPtr.Zero)
             {
-                // Simulate a continuous press of the 'F' key
-                PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
+                if (toggle)
+                {
+                    // Spam mode: simulate discrete presses of the 'F' key
+                    PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
+                }
+                else if (holdToggle)
+                {
+                    // Hold mode: simulate keyboard auto-repeat while the key stays down
+                    PostMessage(gameHandle, WM_KEYDOWN, VK_F, LPARAM_AUTOREPEAT);
+                }
             }
-            // No action needed in the "else" case, as no key press will be sent
-            Thread.Sleep(100); // Delay to prevent too rapid execution
+            Thread.Sleep(toggle ? Math.Max(10, spamIntervalMs) : 100);
         }
     }
 
