@@ -5,7 +5,7 @@ A handy tool for Palworld gamers, the Palworld Auto-F Key Presser automates 'F' 
 ## ONLY TESTED ON STEAM VERSION
 ## Features
 - **Spam Mode (ALT+J)**: Repeatedly presses 'F' in Palworld without user intervention (quick individual presses, 100 ms interval by default).
-- **Hold Mode (ALT+H)**: Simulates holding the 'F' key down, for hold interactions.
+- **Hold Mode (ALT+H)**: Simulates holding the 'F' key down, for hold interactions. The hold is automatically re-primed when the game window loses or regains focus (alt-tab).
 - **Adjustable Interval**: Set the spam interval in milliseconds directly from the status window.
 - **Non-Disruptive**: Functions seamlessly in the background.
 - **User-Friendly Interface**: Comes with a status indicator for operational modes.
