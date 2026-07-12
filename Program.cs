@@ -10,16 +10,11 @@ class Program
 {
     private const int WH_KEYBOARD_LL = 13;
     private const int WM_KEYDOWN = 0x0100;
-    private const int WM_KEYUP = 0x0101;
     private const int WM_SYSKEYDOWN = 0x0104; // key down while ALT is held
     private const byte VK_F = 0x46; // Virtual key code for 'F'
-    private const int LPARAM_AUTOREPEAT = 0x40000000; // bit 30: previous key state was down
-    private const int LPARAM_KEYUP = unchecked((int)0xC0000001); // repeat count 1 + bits 30/31 set
     private static LowLevelKeyboardProc _proc = HookCallback;
     private static IntPtr _hookID = IntPtr.Zero;
     private static bool toggle = false;
-    private static bool holdToggle = false;
-    private static bool? holdHadFocus = null; // last known focus state of the game window while holding
     public static volatile int spamIntervalMs = 100;
     private static Thread sendFThread;
     private static IntPtr gameHandle = IntPtr.Zero;
@@ -60,7 +55,6 @@ class Program
             sendFThread.IsBackground = true;
             sendFThread.Start();
             Application.Run(statusForm);
-            ReleaseHoldIfActive();
             UnhookWindowsHookEx(_hookID);
         }
     }
@@ -91,32 +85,8 @@ class Program
 
                 if (toggle)
                 {
-                    ReleaseHoldIfActive(); // spam and hold modes are exclusive
                     FindGameHandle();
                 }
-
-                UpdateStatusDisplay();
-                return (IntPtr)1; // Prevent further processing of the key
-            }
-
-            if ((Keys)vkCode == Keys.H && (Control.ModifierKeys & Keys.Alt) == Keys.Alt)
-            {
-                if (holdToggle)
-                {
-                    ReleaseHoldIfActive();
-                }
-                else
-                {
-                    toggle = false; // spam and hold modes are exclusive
-                    FindGameHandle();
-                    if (gameHandle != IntPtr.Zero)
-                    {
-                        holdToggle = true;
-                        holdHadFocus = null;
-                        PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
-                    }
-                }
-                Debug.WriteLine("ALT+H pressed - Hold toggle is now " + holdToggle); // Debugging
 
                 UpdateStatusDisplay();
                 return (IntPtr)1; // Prevent further processing of the key
@@ -141,24 +111,11 @@ class Program
         }
     }
 
-    public static void ReleaseHoldIfActive()
-    {
-        if (holdToggle)
-        {
-            holdToggle = false;
-            holdHadFocus = null;
-            if (gameHandle != IntPtr.Zero)
-            {
-                PostMessage(gameHandle, WM_KEYUP, VK_F, LPARAM_KEYUP);
-            }
-        }
-    }
-
     private static void UpdateStatusDisplay()
     {
         statusForm?.Invoke(new Action(() =>
         {
-            statusForm.UpdateStatus(toggle, holdToggle);
+            statusForm.UpdateStatus(toggle);
         }));
     }
 
@@ -166,31 +123,13 @@ class Program
     {
         while (isApplicationRunning)
         {
-            if (gameHandle != IntPtr.Zero)
+            if (gameHandle != IntPtr.Zero && toggle)
             {
-                if (toggle)
-                {
-                    // Spam mode: simulate discrete presses of the 'F' key
-                    PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
-                }
-                else if (holdToggle)
-                {
-                    // The game flushes its key state whenever the window gains or loses
-                    // focus (UE FlushPressedKeys), which kills the hold: re-prime it with
-                    // a fresh key press on every focus transition
-                    bool gameHasFocus = GetForegroundWindow() == gameHandle;
-                    if (holdHadFocus.HasValue && holdHadFocus.Value != gameHasFocus)
-                    {
-                        PostMessage(gameHandle, WM_KEYUP, VK_F, LPARAM_KEYUP);
-                        Thread.Sleep(60); // games may merge a release + re-press within ~50 ms
-                        PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
-                        statusForm?.Invoke(new Action(() => statusForm.AppendDebugMessage("Focus changed - hold re-primed")));
-                    }
-                    holdHadFocus = gameHasFocus;
-
-                    // Simulate keyboard auto-repeat while the key stays down
-                    PostMessage(gameHandle, WM_KEYDOWN, VK_F, LPARAM_AUTOREPEAT);
-                }
+                // Simulate discrete presses of the 'F' key. No key-up is ever sent, so
+                // the game also sees F as continuously held, which covers hold
+                // interactions too (when "Single button press for hold interactions"
+                // is disabled in Palworld's options)
+                PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
             }
             Thread.Sleep(toggle ? Math.Max(10, spamIntervalMs) : 100);
         }
@@ -228,7 +167,4 @@ class Program
 
     [DllImport("user32.dll")]
     private static extern bool PostMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
-
-    [DllImport("user32.dll")]
-    private static extern IntPtr GetForegroundWindow();
 }

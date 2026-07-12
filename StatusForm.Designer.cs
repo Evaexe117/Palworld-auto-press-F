@@ -12,6 +12,7 @@ namespace PalWorldPressF
         private TextBox debugTextBox;
         private Label intervalLabel;
         private NumericUpDown intervalNumeric;
+        private Label tipLabel;
 
         private void InitializeComponent()
         {
@@ -21,6 +22,7 @@ namespace PalWorldPressF
             debugTextBox = new TextBox();
             intervalLabel = new Label();
             intervalNumeric = new NumericUpDown();
+            tipLabel = new Label();
             debugTextBox.Location = new Point(14, 70);
             debugTextBox.Size = new Size(358, 20);
             debugTextBox.Multiline = false;
@@ -53,7 +55,7 @@ namespace PalWorldPressF
             instructionsLabel.Location = new Point(14, 46);
             instructionsLabel.Name = "instructionsLabel";
             instructionsLabel.Size = new Size(180, 15);
-            instructionsLabel.Text = "ALT+J: spam F  |  ALT+H: hold F";
+            instructionsLabel.Text = "ALT+J: toggle auto-press F";
             //
             // intervalLabel
             //
@@ -74,16 +76,26 @@ namespace PalWorldPressF
             intervalNumeric.Value = 100;
             intervalNumeric.ValueChanged += IntervalNumeric_ValueChanged;
             //
+            // tipLabel
+            //
+            tipLabel.AutoSize = false;
+            tipLabel.Location = new Point(14, 126);
+            tipLabel.Name = "tipLabel";
+            tipLabel.Size = new Size(358, 32);
+            tipLabel.ForeColor = Color.DimGray;
+            tipLabel.Text = "Tip: disable \"Single button press for hold interactions\" in Palworld's options, so auto-press F also covers hold interactions.";
+            //
             // StatusForm
             //
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(386, 132);
+            ClientSize = new Size(386, 164);
             Controls.Add(statusLabel);
             Controls.Add(instructionsLabel);
             Controls.Add(closeButton);
             Controls.Add(intervalLabel);
             Controls.Add(intervalNumeric);
+            Controls.Add(tipLabel);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -97,7 +109,6 @@ namespace PalWorldPressF
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            Program.ReleaseHoldIfActive(); // Don't leave 'F' logically held down in the game
             Program.isApplicationRunning = false; // Signal the thread to stop
         }
 
@@ -111,18 +122,13 @@ namespace PalWorldPressF
             Program.spamIntervalMs = (int)intervalNumeric.Value;
         }
 
-        public void UpdateStatus(bool isSpamming, bool isHolding)
+        public void UpdateStatus(bool isSpamming)
         {
             // Update the label text and color to reflect the status
             if (isSpamming)
             {
-                statusLabel.Text = "Running (spam)";
+                statusLabel.Text = "Running";
                 statusLabel.ForeColor = Color.Green;
-            }
-            else if (isHolding)
-            {
-                statusLabel.Text = "Running (hold)";
-                statusLabel.ForeColor = Color.Blue;
             }
             else
             {
