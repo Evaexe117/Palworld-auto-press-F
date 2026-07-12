@@ -19,6 +19,7 @@ class Program
     private static IntPtr _hookID = IntPtr.Zero;
     private static bool toggle = false;
     private static bool holdToggle = false;
+    private static bool? holdHadFocus = null; // last known focus state of the game window while holding
     public static volatile int spamIntervalMs = 100;
     private static Thread sendFThread;
     private static IntPtr gameHandle = IntPtr.Zero;
@@ -111,6 +112,7 @@ class Program
                     if (gameHandle != IntPtr.Zero)
                     {
                         holdToggle = true;
+                        holdHadFocus = null;
                         PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
                     }
                 }
@@ -144,6 +146,7 @@ class Program
         if (holdToggle)
         {
             holdToggle = false;
+            holdHadFocus = null;
             if (gameHandle != IntPtr.Zero)
             {
                 PostMessage(gameHandle, WM_KEYUP, VK_F, LPARAM_KEYUP);
@@ -172,7 +175,20 @@ class Program
                 }
                 else if (holdToggle)
                 {
-                    // Hold mode: simulate keyboard auto-repeat while the key stays down
+                    // The game flushes its key state whenever the window gains or loses
+                    // focus (UE FlushPressedKeys), which kills the hold: re-prime it with
+                    // a fresh key press on every focus transition
+                    bool gameHasFocus = GetForegroundWindow() == gameHandle;
+                    if (holdHadFocus.HasValue && holdHadFocus.Value != gameHasFocus)
+                    {
+                        PostMessage(gameHandle, WM_KEYUP, VK_F, LPARAM_KEYUP);
+                        Thread.Sleep(60); // games may merge a release + re-press within ~50 ms
+                        PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
+                        statusForm?.Invoke(new Action(() => statusForm.AppendDebugMessage("Focus changed - hold re-primed")));
+                    }
+                    holdHadFocus = gameHasFocus;
+
+                    // Simulate keyboard auto-repeat while the key stays down
                     PostMessage(gameHandle, WM_KEYDOWN, VK_F, LPARAM_AUTOREPEAT);
                 }
             }
@@ -212,4 +228,7 @@ class Program
 
     [DllImport("user32.dll")]
     private static extern bool PostMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
 }
