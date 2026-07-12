@@ -53,7 +53,7 @@ namespace PalWorldPressF
             instructionsLabel.Location = new Point(14, 46);
             instructionsLabel.Name = "instructionsLabel";
             instructionsLabel.Size = new Size(180, 15);
-            instructionsLabel.Text = "CTRL+P: spam F  |  CTRL+H: hold F";
+            instructionsLabel.Text = "ALT+J: spam F  |  ALT+H: hold F";
             //
             // intervalLabel
             //
