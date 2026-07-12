@@ -11,6 +11,7 @@ class Program
     private const int WH_KEYBOARD_LL = 13;
     private const int WM_KEYDOWN = 0x0100;
     private const int WM_KEYUP = 0x0101;
+    private const int WM_SYSKEYDOWN = 0x0104; // key down while ALT is held
     private const byte VK_F = 0x46; // Virtual key code for 'F'
     private const int LPARAM_AUTOREPEAT = 0x40000000; // bit 30: previous key state was down
     private const int LPARAM_KEYUP = unchecked((int)0xC0000001); // repeat count 1 + bits 30/31 set
@@ -76,15 +77,16 @@ class Program
 
     private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
     {
-        if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
+        // ALT combos arrive as WM_SYSKEYDOWN, not WM_KEYDOWN
+        if (nCode >= 0 && (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN))
         {
             int vkCode = Marshal.ReadInt32(lParam);
             Debug.WriteLine("Key pressed: " + (Keys)vkCode); // Debugging
 
-            if ((Keys)vkCode == Keys.P && (Control.ModifierKeys & Keys.Control) == Keys.Control)
+            if ((Keys)vkCode == Keys.J && (Control.ModifierKeys & Keys.Alt) == Keys.Alt)
             {
                 toggle = !toggle;
-                Debug.WriteLine("CTRL+P pressed - Spam toggle is now " + toggle); // Debugging
+                Debug.WriteLine("ALT+J pressed - Spam toggle is now " + toggle); // Debugging
 
                 if (toggle)
                 {
@@ -96,7 +98,7 @@ class Program
                 return (IntPtr)1; // Prevent further processing of the key
             }
 
-            if ((Keys)vkCode == Keys.H && (Control.ModifierKeys & Keys.Control) == Keys.Control)
+            if ((Keys)vkCode == Keys.H && (Control.ModifierKeys & Keys.Alt) == Keys.Alt)
             {
                 if (holdToggle)
                 {
@@ -112,7 +114,7 @@ class Program
                         PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
                     }
                 }
-                Debug.WriteLine("CTRL+H pressed - Hold toggle is now " + holdToggle); // Debugging
+                Debug.WriteLine("ALT+H pressed - Hold toggle is now " + holdToggle); // Debugging
 
                 UpdateStatusDisplay();
                 return (IntPtr)1; // Prevent further processing of the key
