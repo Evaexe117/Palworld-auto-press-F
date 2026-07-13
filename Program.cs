@@ -10,11 +10,14 @@ class Program
 {
     private const int WH_KEYBOARD_LL = 13;
     private const int WM_KEYDOWN = 0x0100;
+    private const int WM_KEYUP = 0x0101;
     private const int WM_SYSKEYDOWN = 0x0104; // key down while ALT is held
     private const byte VK_F = 0x46; // Virtual key code for 'F'
+    private const int LPARAM_KEYUP = unchecked((int)0xC0000001); // repeat count 1 + bits 30/31 set
     private static LowLevelKeyboardProc _proc = HookCallback;
     private static IntPtr _hookID = IntPtr.Zero;
     private static bool toggle = false;
+    private static bool? hadFocus = null; // last known focus state of the game window while active
     public static volatile int spamIntervalMs = 100;
     private static Thread sendFThread;
     private static IntPtr gameHandle = IntPtr.Zero;
@@ -55,6 +58,10 @@ class Program
             sendFThread.IsBackground = true;
             sendFThread.Start();
             Application.Run(statusForm);
+            if (toggle)
+            {
+                ReleaseF();
+            }
             UnhookWindowsHookEx(_hookID);
         }
     }
@@ -85,7 +92,12 @@ class Program
 
                 if (toggle)
                 {
+                    hadFocus = null;
                     FindGameHandle();
+                }
+                else
+                {
+                    ReleaseF();
                 }
 
                 UpdateStatusDisplay();
@@ -111,6 +123,17 @@ class Program
         }
     }
 
+    private static void ReleaseF()
+    {
+        // The auto-press never sends key-ups, so tell the game F is released
+        // when the toggle turns off (or the app exits) to avoid a stuck key
+        if (gameHandle != IntPtr.Zero)
+        {
+            PostMessage(gameHandle, WM_KEYUP, VK_F, LPARAM_KEYUP);
+        }
+        hadFocus = null;
+    }
+
     private static void UpdateStatusDisplay()
     {
         statusForm?.Invoke(new Action(() =>
@@ -125,10 +148,23 @@ class Program
         {
             if (gameHandle != IntPtr.Zero && toggle)
             {
-                // Simulate discrete presses of the 'F' key. No key-up is ever sent, so
-                // the game also sees F as continuously held, which covers hold
-                // interactions too (when "Single button press for hold interactions"
-                // is disabled in Palworld's options)
+                // The game flushes its pressed-key state whenever the window gains or
+                // loses focus (UE FlushPressedKeys), which kills the held F: on every
+                // focus transition, send an explicit release so the next key-down is
+                // seen as a fresh press re-establishing the hold
+                bool gameHasFocus = GetForegroundWindow() == gameHandle;
+                if (hadFocus.HasValue && hadFocus.Value != gameHasFocus)
+                {
+                    PostMessage(gameHandle, WM_KEYUP, VK_F, LPARAM_KEYUP);
+                    Thread.Sleep(60); // games may merge a release + re-press within ~50 ms
+                    statusForm?.Invoke(new Action(() => statusForm.AppendDebugMessage("Focus changed - hold re-primed")));
+                }
+                hadFocus = gameHasFocus;
+
+                // Simulate discrete presses of the 'F' key. No key-up is sent between
+                // presses, so the game also sees F as continuously held, which covers
+                // hold interactions too (when "Single button press for hold
+                // interactions" is disabled in Palworld's options)
                 PostMessage(gameHandle, WM_KEYDOWN, VK_F, 0);
             }
             Thread.Sleep(toggle ? Math.Max(10, spamIntervalMs) : 100);
@@ -167,4 +203,7 @@ class Program
 
     [DllImport("user32.dll")]
     private static extern bool PostMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
 }
