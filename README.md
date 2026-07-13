@@ -4,7 +4,7 @@
 A handy tool for Palworld gamers, the Palworld Auto-F Key Presser automates 'F' key presses in-game. It operates in the background, enabling smooth and uninterrupted gameplay and PC use.  
 ## ONLY TESTED ON STEAM VERSION
 ## Features
-- **Auto-Press (ALT+J)**: Repeatedly presses 'F' in Palworld without user intervention (100 ms interval by default). Since no key release is ever sent, the game also sees 'F' as continuously held, so it covers hold interactions too, and keeps working after alt-tabbing.
+- **Auto-Press (ALT+J)**: Repeatedly presses 'F' in Palworld without user intervention (100 ms interval by default). Since no key release is sent between presses, the game also sees 'F' as continuously held, so it covers hold interactions too. The held state is automatically re-established whenever the game window gains or loses focus, so it keeps working after alt-tabbing.
 - **Adjustable Interval**: Set the spam interval in milliseconds directly from the status window.
 - **Non-Disruptive**: Functions seamlessly in the background.
 - **User-Friendly Interface**: Comes with a status indicator for operational modes.
