@@ -8,8 +8,12 @@ namespace PalWorldPressF
     {
         private Label statusLabel;
         private Button closeButton;
-        private Label instructionsLabel; // New label for instructions
+        private Label instructionsLabel;
         private TextBox debugTextBox;
+        private Label pressKeyLabel;
+        private ComboBox pressKeyComboBox;
+        private Label toggleKeyLabel;
+        private ComboBox toggleKeyComboBox;
         private Label intervalLabel;
         private NumericUpDown intervalNumeric;
         private Label tipLabel;
@@ -20,15 +24,13 @@ namespace PalWorldPressF
             closeButton = new Button();
             instructionsLabel = new Label();
             debugTextBox = new TextBox();
+            pressKeyLabel = new Label();
+            pressKeyComboBox = new ComboBox();
+            toggleKeyLabel = new Label();
+            toggleKeyComboBox = new ComboBox();
             intervalLabel = new Label();
             intervalNumeric = new NumericUpDown();
             tipLabel = new Label();
-            debugTextBox.Location = new Point(14, 70);
-            debugTextBox.Size = new Size(358, 20);
-            debugTextBox.Multiline = false;
-            debugTextBox.ScrollBars = ScrollBars.Vertical;
-
-            Controls.Add(debugTextBox);
             SuspendLayout();
             //
             // statusLabel
@@ -57,42 +59,89 @@ namespace PalWorldPressF
             instructionsLabel.Size = new Size(180, 15);
             instructionsLabel.Text = "ALT+J: toggle auto-press F";
             //
+            // debugTextBox
+            //
+            debugTextBox.Location = new Point(14, 78);
+            debugTextBox.Multiline = false;
+            debugTextBox.Name = "debugTextBox";
+            debugTextBox.ScrollBars = ScrollBars.Vertical;
+            debugTextBox.Size = new Size(358, 20);
+            //
+            // pressKeyLabel
+            //
+            pressKeyLabel.AutoSize = true;
+            pressKeyLabel.Location = new Point(14, 112);
+            pressKeyLabel.Name = "pressKeyLabel";
+            pressKeyLabel.Size = new Size(96, 15);
+            pressKeyLabel.Text = "Pressed/held key:";
+            //
+            // pressKeyComboBox
+            //
+            pressKeyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            pressKeyComboBox.FormattingEnabled = true;
+            pressKeyComboBox.Location = new Point(140, 108);
+            pressKeyComboBox.Name = "pressKeyComboBox";
+            pressKeyComboBox.Size = new Size(80, 23);
+            pressKeyComboBox.SelectedIndexChanged += PressKeyComboBox_SelectedIndexChanged;
+            //
+            // toggleKeyLabel
+            //
+            toggleKeyLabel.AutoSize = true;
+            toggleKeyLabel.Location = new Point(14, 142);
+            toggleKeyLabel.Name = "toggleKeyLabel";
+            toggleKeyLabel.Size = new Size(116, 15);
+            toggleKeyLabel.Text = "ALT toggle letter:";
+            //
+            // toggleKeyComboBox
+            //
+            toggleKeyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            toggleKeyComboBox.FormattingEnabled = true;
+            toggleKeyComboBox.Location = new Point(140, 138);
+            toggleKeyComboBox.Name = "toggleKeyComboBox";
+            toggleKeyComboBox.Size = new Size(80, 23);
+            toggleKeyComboBox.SelectedIndexChanged += ToggleKeyComboBox_SelectedIndexChanged;
+            //
             // intervalLabel
             //
             intervalLabel.AutoSize = true;
-            intervalLabel.Location = new Point(14, 100);
+            intervalLabel.Location = new Point(14, 172);
             intervalLabel.Name = "intervalLabel";
             intervalLabel.Size = new Size(120, 15);
             intervalLabel.Text = "Spam interval (ms):";
             //
             // intervalNumeric
             //
-            intervalNumeric.Location = new Point(140, 96);
+            intervalNumeric.Increment = 10;
+            intervalNumeric.Location = new Point(140, 168);
+            intervalNumeric.Maximum = 5000;
+            intervalNumeric.Minimum = 10;
             intervalNumeric.Name = "intervalNumeric";
             intervalNumeric.Size = new Size(80, 23);
-            intervalNumeric.Minimum = 10;
-            intervalNumeric.Maximum = 5000;
-            intervalNumeric.Increment = 10;
             intervalNumeric.Value = 100;
             intervalNumeric.ValueChanged += IntervalNumeric_ValueChanged;
             //
             // tipLabel
             //
             tipLabel.AutoSize = false;
-            tipLabel.Location = new Point(14, 126);
+            tipLabel.ForeColor = Color.DimGray;
+            tipLabel.Location = new Point(14, 198);
             tipLabel.Name = "tipLabel";
             tipLabel.Size = new Size(358, 32);
-            tipLabel.ForeColor = Color.DimGray;
-            tipLabel.Text = "Tip: disable \"Single button press for hold interactions\" in Palworld's options, so auto-press F also covers hold interactions.";
+            tipLabel.Text = "Tip: disable \"Single button press for hold interactions\" in Palworld's options, so the selected auto-press key also covers hold interactions.";
             //
             // StatusForm
             //
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(386, 164);
+            ClientSize = new Size(386, 236);
             Controls.Add(statusLabel);
             Controls.Add(instructionsLabel);
             Controls.Add(closeButton);
+            Controls.Add(debugTextBox);
+            Controls.Add(pressKeyLabel);
+            Controls.Add(pressKeyComboBox);
+            Controls.Add(toggleKeyLabel);
+            Controls.Add(toggleKeyComboBox);
             Controls.Add(intervalLabel);
             Controls.Add(intervalNumeric);
             Controls.Add(tipLabel);
@@ -101,9 +150,12 @@ namespace PalWorldPressF
             MinimizeBox = false;
             Name = "StatusForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "PalWorld - Auto Press F in background ";
+            Text = "PalWorld - Auto Press Key in background";
             ResumeLayout(false);
             PerformLayout();
+
+            PopulateKeyDropdowns();
+            UpdateInstructions();
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -120,6 +172,35 @@ namespace PalWorldPressF
         private void IntervalNumeric_ValueChanged(object sender, EventArgs e)
         {
             Program.spamIntervalMs = (int)intervalNumeric.Value;
+        }
+
+        private void PressKeyComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Program.SetPressedKey((Keys)pressKeyComboBox.SelectedItem);
+            UpdateInstructions();
+        }
+
+        private void ToggleKeyComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Program.SetToggleKey((Keys)toggleKeyComboBox.SelectedItem);
+            UpdateInstructions();
+        }
+
+        private void PopulateKeyDropdowns()
+        {
+            for (Keys key = Keys.A; key <= Keys.Z; key++)
+            {
+                pressKeyComboBox.Items.Add(key);
+                toggleKeyComboBox.Items.Add(key);
+            }
+
+            pressKeyComboBox.SelectedItem = (Keys)Program.pressedKeyCode;
+            toggleKeyComboBox.SelectedItem = (Keys)Program.toggleKeyCode;
+        }
+
+        public void UpdateInstructions()
+        {
+            instructionsLabel.Text = $"ALT+{(Keys)Program.toggleKeyCode}: toggle auto-press {(Keys)Program.pressedKeyCode}";
         }
 
         public void UpdateStatus(bool isSpamming)
