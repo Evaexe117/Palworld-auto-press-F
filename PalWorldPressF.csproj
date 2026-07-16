@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Version>4.5</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <AssemblyTitle>PalWorld - Auto Press Key in background</AssemblyTitle>
+    <Product>Palworld-auto-press-F</Product>
   </PropertyGroup>
 
 </Project>
