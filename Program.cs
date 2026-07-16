@@ -132,13 +132,16 @@ class Program
             return;
         }
 
+        // Swap the key code before releasing the old one, otherwise the send
+        // loop can post one more key-down of the old key after its release,
+        // leaving it stuck held in the game
+        pressedKeyCode = (int)key;
+
         if (toggle)
         {
             ReleaseKey(previousKeyCode);
             hadFocus = null;
         }
-
-        pressedKeyCode = (int)key;
     }
 
     public static void SetToggleKey(Keys key)
