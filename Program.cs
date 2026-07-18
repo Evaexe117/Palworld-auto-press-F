@@ -20,6 +20,8 @@ class Program
     public static volatile int spamIntervalMs = 100;
     public static volatile int pressedKeyCode = (int)Keys.F;
     public static volatile int toggleKeyCode = (int)Keys.J;
+    public static volatile bool cancelOnKeyEnabled = false;
+    public static volatile int cancelKeyCode = (int)Keys.Escape;
     private static Thread sendKeyThread;
     private static IntPtr gameHandle = IntPtr.Zero;
     public static StatusForm statusForm;
@@ -57,6 +59,8 @@ class Program
             pressedKeyCode = settings.PressedKeyCode;
             toggleKeyCode = settings.ToggleKeyCode;
             spamIntervalMs = settings.SpamIntervalMs;
+            cancelOnKeyEnabled = settings.CancelOnKeyPress;
+            cancelKeyCode = settings.CancelKeyCode;
 
             statusForm = new StatusForm();
             _hookID = SetHook(_proc);
@@ -109,6 +113,18 @@ class Program
                 UpdateStatusDisplay();
                 return (IntPtr)1; // Prevent further processing of the key
             }
+
+            // Optional auto-cancel (issue #5): pressing the configured cancel key
+            // (e.g. ESC to open a menu) turns the auto-press off, so the spammed key
+            // doesn't keep firing into the menu. The key is NOT swallowed, it must
+            // still reach the game to do its normal action.
+            if (toggle && cancelOnKeyEnabled && vkCode == cancelKeyCode)
+            {
+                toggle = false;
+                ReleasePressedKey();
+                UpdateStatusDisplay();
+                statusForm?.Invoke(new Action(() => statusForm.AppendDebugMessage($"{(Keys)vkCode} pressed - auto-press cancelled")));
+            }
         }
 
         return CallNextHookEx(_hookID, nCode, wParam, lParam);
@@ -160,7 +176,9 @@ class Program
         {
             PressedKeyCode = pressedKeyCode,
             ToggleKeyCode = toggleKeyCode,
-            SpamIntervalMs = spamIntervalMs
+            SpamIntervalMs = spamIntervalMs,
+            CancelOnKeyPress = cancelOnKeyEnabled,
+            CancelKeyCode = cancelKeyCode
         }.Save();
     }
 

@@ -16,6 +16,8 @@ namespace PalWorldPressF
         private ComboBox toggleKeyComboBox;
         private Label intervalLabel;
         private NumericUpDown intervalNumeric;
+        private CheckBox cancelCheckBox;
+        private ComboBox cancelKeyComboBox;
         private Label tipLabel;
 
         private void InitializeComponent()
@@ -30,6 +32,8 @@ namespace PalWorldPressF
             toggleKeyComboBox = new ComboBox();
             intervalLabel = new Label();
             intervalNumeric = new NumericUpDown();
+            cancelCheckBox = new CheckBox();
+            cancelKeyComboBox = new ComboBox();
             tipLabel = new Label();
             SuspendLayout();
             //
@@ -120,11 +124,29 @@ namespace PalWorldPressF
             intervalNumeric.Value = 100;
             intervalNumeric.ValueChanged += IntervalNumeric_ValueChanged;
             //
+            // cancelCheckBox
+            //
+            cancelCheckBox.AutoSize = true;
+            cancelCheckBox.Location = new Point(14, 200);
+            cancelCheckBox.Name = "cancelCheckBox";
+            cancelCheckBox.Size = new Size(120, 19);
+            cancelCheckBox.Text = "Cancel on key press:";
+            cancelCheckBox.CheckedChanged += CancelCheckBox_CheckedChanged;
+            //
+            // cancelKeyComboBox
+            //
+            cancelKeyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            cancelKeyComboBox.FormattingEnabled = true;
+            cancelKeyComboBox.Location = new Point(158, 198);
+            cancelKeyComboBox.Name = "cancelKeyComboBox";
+            cancelKeyComboBox.Size = new Size(80, 23);
+            cancelKeyComboBox.SelectedIndexChanged += CancelKeyComboBox_SelectedIndexChanged;
+            //
             // tipLabel
             //
             tipLabel.AutoSize = false;
             tipLabel.ForeColor = Color.DimGray;
-            tipLabel.Location = new Point(14, 198);
+            tipLabel.Location = new Point(14, 228);
             tipLabel.Name = "tipLabel";
             tipLabel.Size = new Size(358, 32);
             tipLabel.Text = "Tip: disable \"Single button press for hold interactions\" in Palworld's options, so the selected auto-press key also covers hold interactions.";
@@ -133,7 +155,7 @@ namespace PalWorldPressF
             //
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(386, 236);
+            ClientSize = new Size(386, 266);
             Controls.Add(statusLabel);
             Controls.Add(instructionsLabel);
             Controls.Add(closeButton);
@@ -144,6 +166,8 @@ namespace PalWorldPressF
             Controls.Add(toggleKeyComboBox);
             Controls.Add(intervalLabel);
             Controls.Add(intervalNumeric);
+            Controls.Add(cancelCheckBox);
+            Controls.Add(cancelKeyComboBox);
             Controls.Add(tipLabel);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -189,21 +213,45 @@ namespace PalWorldPressF
             Program.SaveSettings();
         }
 
+        private void CancelCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            Program.cancelOnKeyEnabled = cancelCheckBox.Checked;
+            UpdateInstructions();
+            Program.SaveSettings();
+        }
+
+        private void CancelKeyComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Program.cancelKeyCode = (int)(Keys)cancelKeyComboBox.SelectedItem;
+            UpdateInstructions();
+            Program.SaveSettings();
+        }
+
         private void PopulateKeyDropdowns()
         {
+            cancelKeyComboBox.Items.Add(Keys.Escape);
+            cancelKeyComboBox.Items.Add(Keys.Tab);
+            cancelKeyComboBox.Items.Add(Keys.Space);
+            cancelKeyComboBox.Items.Add(Keys.Enter);
             for (Keys key = Keys.A; key <= Keys.Z; key++)
             {
                 pressKeyComboBox.Items.Add(key);
                 toggleKeyComboBox.Items.Add(key);
+                cancelKeyComboBox.Items.Add(key);
             }
 
             pressKeyComboBox.SelectedItem = (Keys)Program.pressedKeyCode;
             toggleKeyComboBox.SelectedItem = (Keys)Program.toggleKeyCode;
+            cancelKeyComboBox.SelectedItem = (Keys)Program.cancelKeyCode;
+            cancelCheckBox.Checked = Program.cancelOnKeyEnabled;
         }
 
         public void UpdateInstructions()
         {
-            instructionsLabel.Text = $"ALT+{(Keys)Program.toggleKeyCode}: toggle auto-press {(Keys)Program.pressedKeyCode}";
+            string cancelPart = Program.cancelOnKeyEnabled
+                ? $", {(Keys)Program.cancelKeyCode} cancels it"
+                : "";
+            instructionsLabel.Text = $"ALT+{(Keys)Program.toggleKeyCode}: toggle auto-press {(Keys)Program.pressedKeyCode}{cancelPart}";
         }
 
         public void UpdateStatus(bool isSpamming)

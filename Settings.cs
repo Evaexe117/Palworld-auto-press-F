@@ -12,6 +12,8 @@ namespace PalWorldPressF
         public int PressedKeyCode { get; set; } = (int)Keys.F;
         public int ToggleKeyCode { get; set; } = (int)Keys.J;
         public int SpamIntervalMs { get; set; } = 100;
+        public bool CancelOnKeyPress { get; set; } = false;
+        public int CancelKeyCode { get; set; } = (int)Keys.Escape;
 
         private static readonly string FilePath = Path.Combine(AppContext.BaseDirectory, "settings.json");
 
@@ -51,7 +53,18 @@ namespace PalWorldPressF
         {
             return PressedKeyCode >= (int)Keys.A && PressedKeyCode <= (int)Keys.Z
                 && ToggleKeyCode >= (int)Keys.A && ToggleKeyCode <= (int)Keys.Z
-                && SpamIntervalMs >= 10 && SpamIntervalMs <= 5000;
+                && SpamIntervalMs >= 10 && SpamIntervalMs <= 5000
+                && IsValidCancelKey(CancelKeyCode);
+        }
+
+        // Keys offered in the cancel-key dropdown; keep both in sync
+        public static bool IsValidCancelKey(int keyCode)
+        {
+            return keyCode == (int)Keys.Escape
+                || keyCode == (int)Keys.Tab
+                || keyCode == (int)Keys.Space
+                || keyCode == (int)Keys.Enter
+                || (keyCode >= (int)Keys.A && keyCode <= (int)Keys.Z);
         }
     }
 }
