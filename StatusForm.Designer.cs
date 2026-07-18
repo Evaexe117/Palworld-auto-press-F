@@ -172,18 +172,21 @@ namespace PalWorldPressF
         private void IntervalNumeric_ValueChanged(object sender, EventArgs e)
         {
             Program.spamIntervalMs = (int)intervalNumeric.Value;
+            Program.SaveSettings();
         }
 
         private void PressKeyComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             Program.SetPressedKey((Keys)pressKeyComboBox.SelectedItem);
             UpdateInstructions();
+            Program.SaveSettings();
         }
 
         private void ToggleKeyComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             Program.SetToggleKey((Keys)toggleKeyComboBox.SelectedItem);
             UpdateInstructions();
+            Program.SaveSettings();
         }
 
         private void PopulateKeyDropdowns()

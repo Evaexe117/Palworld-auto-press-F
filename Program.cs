@@ -53,6 +53,11 @@ class Program
         }
         else
         {
+            Settings settings = Settings.Load();
+            pressedKeyCode = settings.PressedKeyCode;
+            toggleKeyCode = settings.ToggleKeyCode;
+            spamIntervalMs = settings.SpamIntervalMs;
+
             statusForm = new StatusForm();
             _hookID = SetHook(_proc);
             sendKeyThread = new Thread(SendKeyLoop);
@@ -147,6 +152,16 @@ class Program
     public static void SetToggleKey(Keys key)
     {
         toggleKeyCode = (int)key;
+    }
+
+    public static void SaveSettings()
+    {
+        new Settings
+        {
+            PressedKeyCode = pressedKeyCode,
+            ToggleKeyCode = toggleKeyCode,
+            SpamIntervalMs = spamIntervalMs
+        }.Save();
     }
 
     private static void ReleasePressedKey()
