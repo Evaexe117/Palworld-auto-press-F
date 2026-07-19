@@ -13,6 +13,11 @@ class Program
     private const int WM_KEYUP = 0x0101;
     private const int WM_SYSKEYDOWN = 0x0104; // key down while ALT is held
     private const int LPARAM_KEYUP = unchecked((int)0xC0000001); // repeat count 1 + bits 30/31 set
+    private static readonly string[] GameProcessNames =
+    {
+        "Palworld-Win64-Shipping", // Steam
+        "Palworld-WinGDK-Shipping" // Xbox Game Pass for PC
+    };
     private static LowLevelKeyboardProc _proc = HookCallback;
     private static IntPtr _hookID = IntPtr.Zero;
     private static bool toggle = false;
@@ -132,17 +137,28 @@ class Program
 
     private static void FindGameHandle()
     {
-        Process[] processes = Process.GetProcessesByName("Palworld-Win64-Shipping");
-        if (processes.Length > 0)
+        gameHandle = IntPtr.Zero;
+
+        foreach (string processName in GameProcessNames)
         {
-            gameHandle = processes[0].MainWindowHandle;
-            statusForm?.Invoke(new Action(() => statusForm.AppendDebugMessage("Palworld handle found: " + gameHandle)));
+            foreach (Process process in Process.GetProcessesByName(processName))
+            {
+                using (process)
+                {
+                    IntPtr handle = process.MainWindowHandle;
+                    if (handle == IntPtr.Zero)
+                    {
+                        continue;
+                    }
+
+                    gameHandle = handle;
+                    statusForm?.Invoke(new Action(() => statusForm.AppendDebugMessage($"Palworld handle found ({processName}): {gameHandle}")));
+                    return;
+                }
+            }
         }
-        else
-        {
-            gameHandle = IntPtr.Zero;
-            statusForm?.Invoke(new Action(() => statusForm.AppendDebugMessage("PALWORLD not found.")));
-        }
+
+        statusForm?.Invoke(new Action(() => statusForm.AppendDebugMessage("PALWORLD not found (Steam or Xbox Game Pass for PC).")));
     }
 
     public static void SetPressedKey(Keys key)
